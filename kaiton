@@ -1,0 +1,100 @@
+--[[
+    BLOX FRUITS - KAITUN PROGRESSION MANAGER
+    Version: 1.0
+    Made by @ronzy.exe on discord
+
+    Features:
+      - Level progression tracker
+      - Fighting style purchase checklist
+      - Mastery tracker (400 target)
+      - Quest progression planner
+      - Automatic priority management
+]]
+
+local Kaitun = {}
+
+Kaitun.Config = {
+    TargetMastery = 400,
+
+    FightingStyles = {
+        "Dark Step",
+        "Electric",
+        "Water Kung Fu",
+        "Dragon Breath",
+        "Superhuman",
+        "Death Step",
+        "Sharkman Karate",
+        "Electric Claw",
+        "Dragon Talon",
+        "Godhuman",
+        "Sanguine Art"
+    },
+
+    AutoFarm = false,
+    AutoMastery = false
+}
+
+Kaitun.Progress = {
+    Level = 1,
+    CurrentStyle = nil,
+    PurchasedStyles = {},
+    Mastery = {}
+}
+
+function Kaitun:GetNextStyle()
+    for _, style in ipairs(self.Config.FightingStyles) do
+        if not self.Progress.PurchasedStyles[style] then
+            return style
+        end
+    end
+
+    return nil
+end
+
+function Kaitun:PurchaseStyle(style)
+    if not style then
+        return false
+    end
+
+    self.Progress.PurchasedStyles[style] = true
+    self.Progress.Mastery[style] = 0
+
+    print("[KAITUN] Purchased: " .. style)
+    return true
+end
+
+function Kaitun:UpdateMastery(style, mastery)
+    if not self.Progress.Mastery[style] then
+        return
+    end
+
+    self.Progress.Mastery[style] = math.min(
+        mastery,
+        self.Config.TargetMastery
+    )
+
+    if mastery >= self.Config.TargetMastery then
+        print("[KAITUN] Mastery completed: " .. style)
+    end
+end
+
+function Kaitun:GetNextMastery()
+    for style, mastery in pairs(self.Progress.Mastery) do
+        if mastery < self.Config.TargetMastery then
+            return style
+        end
+    end
+
+    return nil
+end
+
+function Kaitun:GetStatus()
+    print("====== KAITUN STATUS ======")
+    print("Level: " .. self.Progress.Level)
+
+    for style, mastery in pairs(self.Progress.Mastery) do
+        print(style .. ": " .. mastery .. "/400")
+    end
+end
+
+return Kaitun
